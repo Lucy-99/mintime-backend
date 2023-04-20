@@ -3,17 +3,23 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
+import { multerDiskOptions } from 'src/multer.options';
 import { UserDecorator } from 'src/users/user.decorator';
 import { JoinDto } from './dto/join.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
 @Controller('api/users')
@@ -30,7 +36,23 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@UserDecorator() user) {
-    return user;
+    return await this.usersService.findByAddress(user.address);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file', multerDiskOptions))
+  @Patch('profile')
+  async updateProfile(
+    @UserDecorator() user,
+    @Body() updateProfileDto: UpdateProfileDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    console.log(updateProfileDto.nickname)
+    return await this.usersService.updateProfile(
+      user.address,
+      updateProfileDto.nickname,
+      file,
+    );
   }
 
   @Post('join')

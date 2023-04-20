@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { uploadFileURL } from 'src/multer.options';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
 
@@ -28,5 +29,18 @@ export class UsersService {
   async getNonceByAddress(address: string) {
     const user = await this.findByAddress(address);
     return user?.nonce || null;
+  }
+
+  async updateProfile(
+    address: string,
+    nickname: string,
+    file: Express.Multer.File,
+  ) {
+    const updateUser = new User();
+    updateUser.nickname = nickname;
+    updateUser.address = address;
+    if (file) updateUser.avatar = uploadFileURL(file.filename);
+    const user = await this.usersRepository.save(updateUser);
+    return user;
   }
 }

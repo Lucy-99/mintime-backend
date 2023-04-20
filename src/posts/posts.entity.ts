@@ -17,10 +17,9 @@ export class Post {
   userAddress: string;
 
   @ManyToOne(() => User, (user) => user.posts, {
-    onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn([{ name: 'UserAddress', referencedColumnName: 'address' }])
+  @JoinColumn([{ name: 'user_address', referencedColumnName: 'address' }])
   user: User;
 
   @Column('varchar', { name: 'title', length: 32 })
